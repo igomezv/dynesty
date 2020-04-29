@@ -851,7 +851,8 @@ class Sampler(object):
     def run_nested(self, maxiter=None, maxcall=None, dlogz=None,
                    logl_max=np.inf, n_effective=None,
                    add_live=True, print_progress=True,
-                   print_func=None, save_bounds=True):
+                   print_func=None, save_bounds=True,
+                   outputname="chains/dynestySamples"):
         """
         **A wrapper that executes the main nested sampling loop.**
         Iteratively replace the worst live point with a sample drawn
@@ -940,6 +941,11 @@ class Sampler(object):
                     i = self.it - 1
                     print_func(results, i, ncall, dlogz=dlogz,
                                logl_max=logl_max)
+                    f = open(outputname + '.txt', 'a+')
+                    #exp(logwt - loglstar)
+                    weights = np.exp(results[5])
+                    vstarstr = str(results[2]).lstrip('[').rstrip(']')
+                    f.write("{} {} {}\n".format(weights, -1*results[3], vstarstr))
 
             # Add remaining live points to samples.
             if add_live:
@@ -952,11 +958,17 @@ class Sampler(object):
                         delta_logz = np.inf
                     if logz <= -1e6:
                         logz = -np.inf
+                    f = open(outputname + '.txt', 'a+')
+                    weights = np.exp(results[5])
+                    # weights = np.exp(self.result['logwt'] - self.result['logz'][-1])
+                    vstarstr = str(results[2]).lstrip('[').rstrip(']')
+                    f.write("{} {} {}\n".format(weights, -1*results[3], vstarstr))
 
                     # Print progress.
                     if print_progress:
                         print_func(results, it, ncall, add_live_it=i+1,
                                    dlogz=dlogz, logl_max=logl_max)
+                f.close()
         finally:
             if pbar is not None:
                 pbar.close()
