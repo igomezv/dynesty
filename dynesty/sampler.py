@@ -919,6 +919,7 @@ class Sampler(object):
         pbar, print_func = self._get_print_func(print_func, print_progress)
         try:
             ncall = self.ncall
+            f = open(outputname + '_live.txt', 'w+')
             for it, results in enumerate(self.sample(maxiter=maxiter,
                                                      maxcall=maxcall,
                                                      dlogz=dlogz,
@@ -936,13 +937,12 @@ class Sampler(object):
                 if logz <= -1e6:
                     logz = -np.inf
 
-                # Print progress.
+                # Print progress.	
                 if print_progress:
                     i = self.it - 1
                     print_func(results, i, ncall, dlogz=dlogz,
                                logl_max=logl_max)
-                    f = open(outputname + '.txt', 'a+')
-                    #exp(logwt - loglstar)
+                    # exp(logwt - loglstar)
                     weights = np.exp(results[5])
                     vstarstr = str(results[2]).lstrip('[').rstrip(']')
                     f.write("{} {} {}\n".format(weights, -1*results[3], vstarstr))
@@ -950,6 +950,7 @@ class Sampler(object):
             # Add remaining live points to samples.
             if add_live:
                 it = self.it - 1
+                # f = open(outputname + '_test.txt', 'w+')
                 for i, results in enumerate(self.add_live_points()):
                     (worst, ustar, vstar, loglstar, logvol, logwt,
                      logz, logzvar, h, nc, worst_it, boundidx, bounditer,
@@ -958,11 +959,10 @@ class Sampler(object):
                         delta_logz = np.inf
                     if logz <= -1e6:
                         logz = -np.inf
-                    f = open(outputname + '.txt', 'a+')
                     weights = np.exp(results[5])
                     # weights = np.exp(self.result['logwt'] - self.result['logz'][-1])
                     vstarstr = str(results[2]).lstrip('[').rstrip(']')
-                    f.write("{} {} {}\n".format(weights, -1*results[3], vstarstr))
+                    # f.write("{} {} {}\n".format(weights, -1*results[3], vstarstr))
 
                     # Print progress.
                     if print_progress:
